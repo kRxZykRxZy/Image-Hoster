@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Hoster</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      color: #333;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    input, button {
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #imageLink {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Image Hoster</h1>
+
+  <form id="loginForm">
+    <input type="text" name="username" placeholder="Scratch Username" required />
+    <input type="text" name="token" placeholder="ScratchAuth Token" required />
+    <button type="button" onclick="login()">Login with ScratchAuth</button>
+  </form>
+
+  <form id="uploadForm" style="display:none;">
+    <input type="file" name="image" accept="image/*" required />
+    <button type="button" onclick="uploadImage()">Upload Image</button>
+  </form>
+
+  <div id="imageLink"></div>
+
+  <script>
+    const nodeServerUrl = 'http://your-node-server-url.com';
+
+    async function login() {
+      const form = document.getElementById('loginForm');
+      const formData = new FormData(form);
+      const response = await fetch(`${nodeServerUrl}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(formData))
+      });
+      if (response.ok) {
+        document.getElementById('uploadForm').style.display = 'block';
+        alert('Login successful');
+      } else {
+        alert('Login failed');
+      }
+    }
+
+    async function uploadImage() {
+      const form = document.getElementById('uploadForm');
+      const formData = new FormData(form);
+      const response = await fetch(`${nodeServerUrl}/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const result = await response.json();
+      if (response.ok) {
+        document.getElementById('imageLink').innerHTML = `<a href="${result.url}" target="_blank">${result.url}</a>`;
+      } else {
+        alert(result.message || 'Upload failed');
+      }
+    }
+  </script>
+</body>
+</html>
