@@ -59,7 +59,7 @@ app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
 
   fs.rename(tempPath, targetPath, err => {
     if (err) return res.status(500).send('File upload failed');
-    const publicUrl = `http://your-node-server.com/images/${req.file.originalname}`;
+    const publicUrl = `https://image-hoster.onrender.com/images/${req.file.originalname}`;
     res.json({ message: 'Image uploaded successfully', url: publicUrl });
   });
 });
