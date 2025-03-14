@@ -1,40 +1,44 @@
 const express = require('express');
-const multer = require('multer');
 const path = require('path');
+const multer = require('multer');
+const fs = require('fs');
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enable CORS for frontend at scratch-image-hoster.netlify.app
-const FRONTEND_URL = 'https://scratch-image-hoster.netlify.app';  // Frontend URL
+// Enable CORS for the frontend site
+const FRONTEND_URL = 'https://scratch-image-hoster.netlify.app';
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
+app.use(express.json());
 
-// Set up multer to handle file uploads
+// Configure multer for file uploads
 const upload = multer({
-  dest: 'images/', // Directory where images will be stored
+  dest: 'images/',
   limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
 });
 
-// Serve static files (images) from the "images" folder
+// Serve static images from the "images" directory
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-// Route to handle image uploads
+// Handle image uploads (no login required)
 app.post('/upload', upload.single('image'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded' });
   }
 
-  // Generate the public URL for the image
-  const imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+  const tempPath = req.file.path;
+  const targetPath = path.join(__dirname, 'images', req.file.originalname);
 
-  // Return the image URL in the response
-  res.json({
-    message: 'Image uploaded successfully',
-    url: imageUrl
+  fs.rename(tempPath, targetPath, err => {
+    if (err) {
+      console.error('File upload error:', err);
+      return res.status(500).json({ message: 'File upload failed' });
+    }
+    const publicUrl = `${req.protocol}://${req.get('host')}/images/${req.file.originalname}`;
+    res.json({ message: 'Image uploaded successfully', url: publicUrl });
   });
 });
 
-// Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server is running on port: ${PORT}`);
 });
