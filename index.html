@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Image Hoster</title>
+  <title>Image Upload</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -44,7 +44,7 @@
   </style>
 </head>
 <body>
-  <h1>Image Hoster</h1>
+  <h1>Upload Image</h1>
 
   <form id="uploadForm">
     <input type="file" name="image" accept="image/*" required />
@@ -54,20 +54,33 @@
   <div id="imageLink"></div>
 
   <script>
-    const nodeServerUrl = 'https://image-hoster.onrender.com';
+    const nodeServerUrl = 'https://image-hoster.onrender.com'; // Your Node.js backend URL
 
     async function uploadImage() {
       const form = document.getElementById('uploadForm');
       const formData = new FormData(form);
-      const response = await fetch(`${nodeServerUrl}/upload`, {
-        method: 'POST',
-        body: formData
-      });
-      const result = await response.json();
-      if (response.ok) {
-        document.getElementById('imageLink').innerHTML = `<a href="${result.url}" target="_blank">${result.url}</a>`;
-      } else {
-        alert(result.message || 'Upload failed');
+
+      try {
+        // Send the image to the Node.js backend
+        const response = await fetch(`${nodeServerUrl}/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        const result = await response.json();
+        
+        if (response.ok) {
+          // Display the image URL returned by the server
+          document.getElementById('imageLink').innerHTML = `
+            <p>Image uploaded successfully!</p>
+            <img src="${result.url}" alt="Uploaded Image" style="max-width: 100%; height: auto;" />
+            <p>Image URL: <a href="${result.url}" target="_blank">${result.url}</a></p>
+          `;
+        } else {
+          alert(result.message || 'Upload failed');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while uploading the image.');
       }
     }
   </script>
