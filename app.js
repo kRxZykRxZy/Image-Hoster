@@ -31,9 +31,9 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 app.post('/login', async (req, res) => {
   const { username, token } = req.body;
   try {
-    const verificationResponse = await axios.get(`https://scratch.mit.edu/site-api/users/all/${username}`);
+    const verificationResponse = await axios.get(`api.scratch.mit.edu/users/${username}`);
 
-    if (verificationResponse.data.profile.bio.includes(token)) {
+    if (verificationResponse.data.profile.bio.includes(bio)) {
       req.session.user = username;
       res.status(200).send('Login successful');
     } else {
