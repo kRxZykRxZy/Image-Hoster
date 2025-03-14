@@ -46,11 +46,7 @@
 <body>
   <h1>Image Hoster</h1>
 
-  <a href="https://auth.itinerary.eu.org/auth?redirect=https%3A%2F%2Fscratch-image-hoster.netlify.app&name=Scratch%20Image%20Hoster&sign_in_method=cloud">
-    <button>Login with ScratchAuth</button>
-  </a>
-
-  <form id="uploadForm" style="display:none;">
+  <form id="uploadForm">
     <input type="file" name="image" accept="image/*" required />
     <button type="button" onclick="uploadImage()">Upload Image</button>
   </form>
@@ -59,14 +55,6 @@
 
   <script>
     const nodeServerUrl = 'https://image-hoster.onrender.com';
-
-    // Check if the user just logged in
-    const params = new URLSearchParams(window.location.search);
-    const username = params.get('username');
-    if (username) {
-      document.getElementById('uploadForm').style.display = 'block';
-      alert(`Welcome, ${username}!`);
-    }
 
     async function uploadImage() {
       const form = document.getElementById('uploadForm');
