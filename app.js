@@ -3,7 +3,6 @@ const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
 const cors = require('cors');
-const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -11,14 +10,6 @@ const PORT = process.env.PORT || 3000;
 const FRONTEND_URL = 'https://scratch-image-hoster.netlify.app';
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
 app.use(express.json());
-
-// Session setup
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'supersecretkey',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: process.env.NODE_ENV === 'production' }
-}));
 
 // Configure multer for file uploads
 const upload = multer({
@@ -29,16 +20,8 @@ const upload = multer({
 // Serve static images from the "images" directory
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-// Middleware to check login
-function checkAuth(req, res, next) {
-  if (!req.session || !req.session.user) {
-    return res.status(403).json({ message: 'You must be logged in to upload images' });
-  }
-  next();
-}
-
-// Handle image uploads
-app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
+// Handle image uploads (no login required)
+app.post('/upload', upload.single('image'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded' });
   }
