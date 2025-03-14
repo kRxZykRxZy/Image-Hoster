@@ -73,7 +73,7 @@
           document.getElementById('imageLink').innerHTML = `
             <p>Image uploaded successfully!</p>
             <img src="${result.url}" alt="Uploaded Image" style="max-width: 100%; height: auto;" />
-            <p>Image URL: <a href="${result.url}" target="_blank">${result.url}</a></p>
+            <p>Image URL: <span>${result.url}</span></p>
           `;
         } else {
           alert(result.message || 'Upload failed');
