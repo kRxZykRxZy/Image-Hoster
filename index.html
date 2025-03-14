@@ -46,12 +46,9 @@
 <body>
   <h1>Image Hoster</h1>
 
-  <form id="loginForm">
-    <input type="text" name="username" placeholder="Scratch Username" required />
-    <input type="text" name="token" placeholder="ScratchAuth Token" required />
-    <p>To use ScratchAuth token you need to put a custom code on your profile's about me, the code you put on your profile is your token</p>
-    <button type="button" onclick="login()">Login with ScratchAuth</button>
-  </form>
+  <a href="https://auth.itinerary.eu.org/auth?redirect=https%3A%2F%2Fscratch-image-hoster.netlify.app&name=Scratch%20Image%20Hoster&sign_in_method=cloud">
+    <button>Login with ScratchAuth</button>
+  </a>
 
   <form id="uploadForm" style="display:none;">
     <input type="file" name="image" accept="image/*" required />
@@ -61,22 +58,14 @@
   <div id="imageLink"></div>
 
   <script>
-    const nodeServerUrl = 'https://image-hoster.onrender.com/';
+    const nodeServerUrl = 'https://image-hoster.onrender.com';
 
-    async function login() {
-      const form = document.getElementById('loginForm');
-      const formData = new FormData(form);
-      const response = await fetch(`${nodeServerUrl}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(Object.fromEntries(formData))
-      });
-      if (response.ok) {
-        document.getElementById('uploadForm').style.display = 'block';
-        alert('Login successful');
-      } else {
-        alert('Login failed');
-      }
+    // Check if the user just logged in
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username');
+    if (username) {
+      document.getElementById('uploadForm').style.display = 'block';
+      alert(`Welcome, ${username}!`);
     }
 
     async function uploadImage() {
