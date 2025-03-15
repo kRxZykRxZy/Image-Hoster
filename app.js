@@ -7,10 +7,10 @@ const axios = require('axios');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const USERS_FILE = 'users.json';
+const USERS_FILE = 'users.json'; // Where we store the verified users
 
 // Enable CORS
-const FRONTEND_URL = 'https://scratch-image-hoster.netlify.app';
+const FRONTEND_URL = 'https://scratch-image-hoster.netlify.app'; // Change this to your frontend URL if needed
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
 app.use(express.json());
 
@@ -77,14 +77,21 @@ app.post('/upload', upload.single('image'), (req, res) => {
 
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
+  const userDir = path.join(__dirname, 'images', username);
+
+  // Create directory for the user if it doesn't exist
+  if (!fs.existsSync(userDir)) {
+    fs.mkdirSync(userDir, { recursive: true });
+  }
+
   const tempPath = req.file.path;
-  const targetPath = path.join(__dirname, 'images', req.file.originalname);
+  const targetPath = path.join(userDir, req.file.originalname);
 
   fs.rename(tempPath, targetPath, err => {
     if (err) return res.status(500).json({ message: 'File upload failed' });
 
     // Update to the new URL structure
-    const publicUrl = `https://image-hoster.onrender.com/${username}/${req.file.originalname}`;
+    const publicUrl = `https://image-hoster.onrender.com/images/${username}/${req.file.originalname}`;
     res.json({ message: 'Image uploaded successfully', url: publicUrl });
   });
 });
