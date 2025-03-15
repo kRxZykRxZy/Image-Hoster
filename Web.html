@@ -92,6 +92,10 @@
     </div>
 </center>
     <script>
+        const logdd = localStorage.getItem('verifiedUser')
+        if (!logdd) {
+            window.location.href = 'login';
+        }
         // Fill in these fields with your specific details:
 
         // **1. Netlify details**
