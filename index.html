@@ -7,8 +7,8 @@
   <style>
     body {
       font-family: 'Arial', sans-serif;
-      background: linear-gradient(135deg, #0f0f0f, #1a1a2e);
-      color: #00ffea;
+      background: #f4f4f4;
+      color: #333;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -17,10 +17,10 @@
       margin: 0;
     }
     .container {
-      background: rgba(0, 0, 0, 0.8);
+      background: #fff;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 15px #00ffea;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       text-align: center;
       width: 350px;
     }
@@ -28,44 +28,53 @@
       width: 100%;
       padding: 10px;
       margin: 10px 0;
-      border: none;
+      border: 1px solid #ddd;
       border-radius: 5px;
       font-size: 16px;
     }
     input {
-      background: #222;
-      color: #00ffea;
+      background: #fff;
+      color: #333;
     }
     button {
-      background: #00ffea;
-      color: #0f0f0f;
+      background: #007bff;
+      color: white;
       font-weight: bold;
       cursor: pointer;
       transition: 0.3s;
+      border: none;
     }
     button:hover {
-      background: #00c8bb;
+      background: #0056b3;
+    }
+    #imageSection {
+      display: none;
     }
     #imageLink {
       margin-top: 15px;
     }
   </style>
 </head>
-<body>
-<center><div class="container">
+<body><center>
+  <div class="container">
     <h2>Login</h2>
     <input type="text" id="username" placeholder="Enter Scratch Username" required>
     <button onclick="login()">Get Code</button>
     <p id="codeMessage"></p>
-    
+    <button onclick="verifyCode()">Done</button>
+  </div>
+
+  <div class="container" id="imageSection">
     <h2>Upload Image</h2>
     <input type="file" id="imageInput" accept="image/*">
     <button onclick="uploadImage()">Upload</button>
     <div id="imageLink"></div>
   </div>
-
+</center>
   <script>
     const serverUrl = 'https://image-hoster.onrender.com';
+    let loggedIn = false;
+    let currentUsername = '';
 
     async function login() {
       const username = document.getElementById('username').value;
@@ -79,16 +88,37 @@
       
       const result = await response.json();
       document.getElementById('codeMessage').textContent = result.message;
+      currentUsername = username;
+    }
+
+    async function verifyCode() {
+      if (!currentUsername) return alert('You must first request a code.');
+      
+      const response = await fetch(`${serverUrl}/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUsername })
+      });
+      
+      const result = await response.json();
+      if (response.ok) {
+        loggedIn = true;
+        document.getElementById('imageSection').style.display = 'block';
+        alert('Verification successful! You can now upload images.');
+      } else {
+        alert(result.message || 'Verification failed. Make sure you put the code on your Scratch bio.');
+      }
     }
 
     async function uploadImage() {
+      if (!loggedIn) return alert('You must verify your login first.');
+      
       const fileInput = document.getElementById('imageInput');
-      const username = document.getElementById('username').value;
-      if (!fileInput.files.length || !username) return alert('Login and select an image first.');
+      if (!fileInput.files.length) return alert('Select an image first.');
       
       const formData = new FormData();
       formData.append('image', fileInput.files[0]);
-      formData.append('username', username);
+      formData.append('username', currentUsername);
       
       const response = await fetch(`${serverUrl}/upload`, {
         method: 'POST',
@@ -104,5 +134,5 @@
       }
     }
   </script>
-</body></center>  
+</body>
 </html>
