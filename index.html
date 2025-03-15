@@ -3,86 +3,106 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Image Upload</title>
+  <title>Ubbload Image Hosting</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a2e);
+      color: #00ffea;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
-      background-color: #f4f4f4;
+      margin: 0;
     }
-    h1 {
-      color: #333;
-    }
-    form {
-      background: #fff;
+    .container {
+      background: rgba(0, 0, 0, 0.8);
       padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      box-shadow: 0 0 15px #00ffea;
+      text-align: center;
+      width: 350px;
     }
     input, button {
-      margin: 10px 0;
-      padding: 10px;
       width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    input {
+      background: #222;
+      color: #00ffea;
     }
     button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
+      background: #00ffea;
+      color: #0f0f0f;
+      font-weight: bold;
       cursor: pointer;
+      transition: 0.3s;
     }
     button:hover {
-      background-color: #45a049;
+      background: #00c8bb;
     }
     #imageLink {
-      margin-top: 20px;
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
-  <h1>Upload Image</h1>
-
-  <form id="uploadForm">
-    <input type="file" name="image" accept="image/*" required />
-    <button type="button" onclick="uploadImage()">Upload Image</button>
-  </form>
-
-  <div id="imageLink"></div>
+<center><div class="container">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Enter Scratch Username" required>
+    <button onclick="login()">Get Code</button>
+    <p id="codeMessage"></p>
+    
+    <h2>Upload Image</h2>
+    <input type="file" id="imageInput" accept="image/*">
+    <button onclick="uploadImage()">Upload</button>
+    <div id="imageLink"></div>
+  </div>
 
   <script>
-    const nodeServerUrl = 'https://image-hoster.onrender.com'; // Your Node.js backend URL
+    const serverUrl = 'https://image-hoster.onrender.com';
+
+    async function login() {
+      const username = document.getElementById('username').value;
+      if (!username) return alert('Enter your Scratch username.');
+      
+      const response = await fetch(`${serverUrl}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username })
+      });
+      
+      const result = await response.json();
+      document.getElementById('codeMessage').textContent = result.message;
+    }
 
     async function uploadImage() {
-      const form = document.getElementById('uploadForm');
-      const formData = new FormData(form);
-
-      try {
-        // Send the image to the Node.js backend
-        const response = await fetch(`${nodeServerUrl}/upload`, {
-          method: 'POST',
-          body: formData
-        });
-        const result = await response.json();
-        
-        if (response.ok) {
-          // Display the image URL returned by the server
-          document.getElementById('imageLink').innerHTML = `
-            <p>Image uploaded successfully!</p>
-            <img src="${result.url}" alt="Uploaded Image" style="max-width: 100%; height: auto;" />
-            <p>Image URL: <a href="${result.url}" target="_blank">${result.url}</a></p>
-          `;
-        } else {
-          alert(result.message || 'Upload failed');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while uploading the image.');
+      const fileInput = document.getElementById('imageInput');
+      const username = document.getElementById('username').value;
+      if (!fileInput.files.length || !username) return alert('Login and select an image first.');
+      
+      const formData = new FormData();
+      formData.append('image', fileInput.files[0]);
+      formData.append('username', username);
+      
+      const response = await fetch(`${serverUrl}/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      const result = await response.json();
+      if (response.ok) {
+        document.getElementById('imageLink').innerHTML = `<p>Image uploaded successfully!</p>
+          <p><a href="${result.url}" target="_blank" download="false">View Image</a></p>`;
+      } else {
+        alert(result.message || 'Upload failed');
       }
     }
   </script>
-</body>
+</body></center>  
 </html>
