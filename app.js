@@ -83,7 +83,8 @@ app.post('/upload', upload.single('image'), (req, res) => {
   fs.rename(tempPath, targetPath, err => {
     if (err) return res.status(500).json({ message: 'File upload failed' });
 
-    const publicUrl = `${req.protocol}://${req.get('host')}/images/${req.file.originalname}`;
+    // Update to the new URL structure
+    const publicUrl = `https://image-hoster.onrender.com/${username}/${req.file.originalname}`;
     res.json({ message: 'Image uploaded successfully', url: publicUrl });
   });
 });
