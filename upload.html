@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload</title>
+</head>
+<body>
+  <div class="container">
+    <h2>Upload Image</h2>
+    <input type="file" id="imageInput" accept="image/*">
+    <button onclick="uploadImage()">Upload</button>
+    <div id="imageLink"></div>
+  </div>
+
+  <script>
+    const serverUrl = 'https://image-hoster.onrender.com';
+    const username = localStorage.getItem('verifiedUser');
+
+    if (!username) {
+      window.location.href = 'login.html';
+    }
+
+    async function uploadImage() {
+      const fileInput = document.getElementById('imageInput');
+      if (!fileInput.files.length) return alert('Select an image first.');
+
+      const formData = new FormData();
+      formData.append('image', fileInput.files[0]);
+      formData.append('username', username);
+
+      const response = await fetch(`${serverUrl}/upload`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        document.getElementById('imageLink').innerHTML = `<a href="${result.url}" target="_blank">View Image</a>`;
+      } else {
+        alert(result.message);
+      }
+    }
+  </script>
+</body>
+</html>
