@@ -23,6 +23,7 @@
   <script>
     const serverUrl = 'https://image-hoster.onrender.com';
 
+    // Redirect to upload page if user is already verified
     if (localStorage.getItem('verifiedUser')) {
       window.location.href = 'upload.html';
     }
