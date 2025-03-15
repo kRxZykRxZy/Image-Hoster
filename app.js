@@ -9,9 +9,24 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const USERS_FILE = 'users.json'; // Where we store the verified users
 
-// Enable CORS
-const FRONTEND_URL = 'https://scratch-image-hoster.netlify.app'; // Change this to your frontend URL if needed
-app.use(cors({ origin: FRONTEND_URL, credentials: true }));
+// Enable CORS for multiple origins
+const ALLOWED_ORIGINS = [
+  'https://scratch-image-hoster.netlify.app', // First site
+  'https://ubbload.netlify.app',                // Second site
+  'https://krxzykrxzy.github.io/Image-Hoster'            // Third site, etc.
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Configure image uploads
@@ -42,7 +57,7 @@ app.post('/login', (req, res) => {
   users[username] = { code, verified: false };
   saveUsers();
   
-  res.json({ message: `Add this code to your Scratch bio: ${code} This may take a few minutes to find the code in your bio as the api takes a long time to update.` });
+  res.json({ message: `Add this code to your Scratch bio: ${code}. This may take a few minutes to find the code in your bio as the api takes a long time to update.` });
 });
 
 // Verify code in Scratch bio
