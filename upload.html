@@ -3,15 +3,84 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload</title>
-  <link rel="stylesheet" href="login.html">
+  <title>Upload Image</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7fc;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 400px;
+    }
+
+    h2 {
+      font-size: 2em;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    input[type="file"] {
+      padding: 10px;
+      margin: 20px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1em;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    button {
+      padding: 12px 30px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.2em;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .message {
+      margin-top: 20px;
+      font-size: 1.1em;
+      color: #333;
+    }
+
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
+
   <div class="container">
-    <h2>Upload Image</h2>
+    <h2>Upload Your Image</h2>
     <input type="file" id="imageInput" accept="image/*">
     <button onclick="uploadImage()">Upload</button>
-    <div id="imageLink"></div>
+
+    <div id="imageLink" class="message"></div>
   </div>
 
   <script>
@@ -43,5 +112,6 @@
       }
     }
   </script>
+
 </body>
 </html>
