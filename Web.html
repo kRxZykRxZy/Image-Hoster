@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubbload Web Hosting</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 24px;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        button {
+            padding: 15px 30px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        .output-container {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: none;
+        }
+        .output-container a {
+            text-decoration: none;
+            color: #5cb85c;
+            font-weight: bold;
+        }
+        .repo-selector {
+            display: none;
+            margin-top: 20px;
+        }
+        select {
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<center>    <header>
+        Deploy Your Repository to Netlify
+    </header>
+
+    <div class="container">
+        <h2>Login with GitHub or GitLab to Deploy</h2>
+
+        <button id="github-login-btn">Login with GitHub</button>
+        <button id="gitlab-login-btn">Login with GitLab</button>
+
+        <div id="repo-selector" class="repo-selector">
+            <h3>Select a repository to deploy:</h3>
+            <select id="repo-list"></select>
+            <button id="deploy-btn">Deploy to Netlify</button>
+        </div>
+
+        <div class="output-container" id="output-container">
+            <h3>Your Site is Ready!</h3>
+            <p>Click the link below to view your deployed site:</p>
+            <a id="site-link" href="#" target="_blank">View Your Site</a>
+        </div>
+    </div>
+</center>
+    <script>
+        // Fill in these fields with your specific details:
+
+        // **1. Netlify details**
+        const netlifySiteId = 'YOUR_NETLIFY_SITE_ID';  // Replace with your Netlify Site ID
+        const netlifyAccessToken = 'YOUR_NETLIFY_ACCESS_TOKEN';  // Replace with your Netlify Access Token
+        const netlifyDeployUrl = `https://api.netlify.com/api/v1/sites/${netlifySiteId}/deploys`;
+
+        // **2. GitHub OAuth credentials**
+        const githubClientId = 'YOUR_GITHUB_CLIENT_ID'; // Replace with your GitHub OAuth Client ID
+        const githubRedirectUri = 'YOUR_GITHUB_REDIRECT_URI'; // Replace with your GitHub OAuth Redirect URI
+
+        // **3. GitLab OAuth credentials**
+        const gitlabClientId = 'YOUR_GITLAB_CLIENT_ID'; // Replace with your GitLab OAuth Client ID
+        const gitlabRedirectUri = 'YOUR_GITLAB_REDIRECT_URI'; // Replace with your GitLab OAuth Redirect URI
+
+        let accessToken = '';
+        let selectedRepo = '';
+        let repoList = [];
+
+        // GitHub OAuth
+        document.getElementById('github-login-btn').addEventListener('click', () => {
+            window.location.href = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&redirect_uri=${githubRedirectUri}&scope=repo`;  // GitHub OAuth URL
+        });
+
+        // GitLab OAuth
+        document.getElementById('gitlab-login-btn').addEventListener('click', () => {
+            window.location.href = `https://gitlab.com/oauth/authorize?client_id=${gitlabClientId}&response_type=token&scope=api&redirect_uri=${gitlabRedirectUri}`;  // GitLab OAuth URL
+        });
+
+        // OAuth Callback Handling (for GitHub and GitLab)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('code')) {
+            const oauthCode = urlParams.get('code');
+            // Use OAuth code to get GitHub Access Token (this must be handled on the backend in production)
+            fetch(`/getGitHubAccessToken?code=${oauthCode}`) // You need to implement this on your backend
+                .then(res => res.json())
+                .then(data => {
+                    accessToken = data.access_token;
+                    fetchRepos('github', accessToken);  // Fetch GitHub Repos
+                });
+        } else if (urlParams.has('access_token')) {
+            // Handle GitLab OAuth Access Token
+            accessToken = urlParams.get('access_token');
+            fetchRepos('gitlab', accessToken);  // Fetch GitLab Repos
+        }
+
+        // Fetch Repositories based on OAuth service (GitHub or GitLab)
+        function fetchRepos(service, token) {
+            let apiUrl = '';
+            if (service === 'github') {
+                apiUrl = 'https://api.github.com/user/repos';
+            } else if (service === 'gitlab') {
+                apiUrl = 'https://gitlab.com/api/v4/projects';
+            }
+
+            fetch(apiUrl, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            })
+            .then(response => response.json())
+            .then(repos => {
+                repoList = repos;
+                populateRepoList();
+            })
+            .catch(err => console.error(err));
+        }
+
+        // Populate Repository List
+        function populateRepoList() {
+            const repoSelect = document.getElementById('repo-list');
+            repoSelect.innerHTML = '';
+
+            repoList.forEach(repo => {
+                const option = document.createElement('option');
+                option.value = repo.id;
+                option.textContent = repo.name;
+                repoSelect.appendChild(option);
+            });
+
+            document.getElementById('repo-selector').style.display = 'block';
+        }
+
+        // Deploy to Netlify
+        document.getElementById('deploy-btn').addEventListener('click', () => {
+            selectedRepo = document.getElementById('repo-list').value;
+            triggerNetlifyDeployment(selectedRepo);
+        });
+
+        // Trigger Netlify Deployment using the API
+        function triggerNetlifyDeployment(repoId) {
+            const deployData = {
+                repository: repoId
+            };
+
+            fetch(netlifyDeployUrl, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${netlifyAccessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(deployData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('site-link').href = data.deploy_url;
+                document.getElementById('site-link').textContent = 'View your deployed site';
+                document.getElementById('output-container').style.display = 'block';
+            })
+            .catch(err => {
+                alert("Error deploying to Netlify.");
+                console.error(err);
+            });
+        }
+    </script>
+</body>
+</html>
