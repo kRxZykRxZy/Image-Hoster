@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; display: flex; align-items: center; justify-content: center; height: 100vh; }
+    .container { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); text-align: center; width: 350px; }
+    input, button { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+    button { background: #007bff; color: white; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Enter Scratch Username" required>
+    <button onclick="login()">Get Code</button>
+    <p id="codeMessage"></p>
+    <button onclick="verifyCode()">Done</button>
+  </div>
+
+  <script>
+    const serverUrl = 'https://image-hoster.onrender.com';
+
+    if (localStorage.getItem('verifiedUser')) {
+      window.location.href = 'upload.html';
+    }
+
+    async function login() {
+      const username = document.getElementById('username').value;
+      if (!username) return alert('Enter your Scratch username.');
+
+      const response = await fetch(`${serverUrl}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username })
+      });
+
+      const result = await response.json();
+      if (result.verified) {
+        localStorage.setItem('verifiedUser', username);
+        window.location.href = 'upload.html';
+      } else {
+        document.getElementById('codeMessage').textContent = result.message;
+      }
+    }
+
+    async function verifyCode() {
+      const username = document.getElementById('username').value;
+      if (!username) return alert('Enter your username first.');
+
+      const response = await fetch(`${serverUrl}/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username })
+      });
+
+      const result = await response.json();
+      if (result.verified) {
+        localStorage.setItem('verifiedUser', username);
+        window.location.href = 'upload.html';
+      } else {
+        alert(result.message || 'Verification failed.');
+      }
+    }
+  </script>
+</body>
+</html>
