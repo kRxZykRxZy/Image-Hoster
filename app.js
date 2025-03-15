@@ -42,7 +42,7 @@ app.post('/login', (req, res) => {
   users[username] = { code, verified: false };
   saveUsers();
   
-  res.json({ message: `Add this code to your Scratch bio: ${code}` });
+  res.json({ message: `Add this code to your Scratch bio: ${code} This may take a few minutes to find the code in your bio as the api takes a long time to update.` });
 });
 
 // Verify code in Scratch bio
