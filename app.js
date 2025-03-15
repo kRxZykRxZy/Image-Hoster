@@ -7,40 +7,61 @@ const axios = require('axios');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const USERS_FILE = 'users.json';
 
+// Enable CORS
 const FRONTEND_URL = 'https://scratch-image-hoster.netlify.app';
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
 app.use(express.json());
 
-const upload = multer({
-  dest: 'images/',
-  limits: { fileSize: 5 * 1024 * 1024 },
-});
-
+// Configure image uploads
+const upload = multer({ dest: 'images/', limits: { fileSize: 5 * 1024 * 1024 } });
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-const users = {}; 
+// Load verified users from file
+let users = {};
+if (fs.existsSync(USERS_FILE)) {
+  users = JSON.parse(fs.readFileSync(USERS_FILE));
+}
 
+// Save verified users to file
+function saveUsers() {
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+}
+
+// Login - Generate code
 app.post('/login', (req, res) => {
   const { username } = req.body;
   if (!username) return res.status(400).json({ message: 'Username required' });
 
+  if (users[username]) {
+    return res.json({ message: 'You are already verified! You can upload images.', verified: true });
+  }
+
   const code = Math.random().toString(36).substring(2, 8);
   users[username] = { code, verified: false };
+  saveUsers();
+  
   res.json({ message: `Add this code to your Scratch bio: ${code}` });
 });
 
+// Verify code in Scratch bio
 app.post('/verify', async (req, res) => {
   const { username } = req.body;
   if (!username || !users[username]) return res.status(400).json({ message: 'Invalid username' });
 
+  if (users[username].verified) {
+    return res.json({ message: 'You are already verified!', verified: true });
+  }
+
   try {
     const response = await axios.get(`https://api.scratch.mit.edu/users/${username}`);
     const bio = response.data.profile.bio;
-    
+
     if (bio.includes(users[username].code)) {
       users[username].verified = true;
-      res.json({ message: 'Verification successful' });
+      saveUsers();
+      res.json({ message: 'Verification successful', verified: true });
     } else {
       res.status(400).json({ message: 'Code not found in bio' });
     }
@@ -49,10 +70,11 @@ app.post('/verify', async (req, res) => {
   }
 });
 
+// Image Upload
 app.post('/upload', upload.single('image'), (req, res) => {
   const { username } = req.body;
   if (!username || !users[username]?.verified) return res.status(403).json({ message: 'Unauthorized' });
-  
+
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
   const tempPath = req.file.path;
