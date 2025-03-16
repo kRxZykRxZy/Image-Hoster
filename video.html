@@ -77,6 +77,9 @@
     </div>
 </center>
     <script>
+        if (!localStorage.setItem('verifiedUser) {
+            window.location.href = 'login';
+        }
         document.getElementById('uploadForm').addEventListener('submit', function (e) {
             e.preventDefault();  // Prevent form submission
 
