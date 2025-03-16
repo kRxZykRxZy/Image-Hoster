@@ -2,8 +2,32 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');  // Add fs to check folder existence
+const cors = require('cors');  // Import the cors package
 const app = express();
 const port = 3000;
+
+// Define allowed front-end URLs (you can modify these)
+const allowedOrigins = [
+  'https://scratch-image-hoster.netlify.app',  // Frontend running on localhost port 3001
+  'https://ubbload.netlify.app',    // Frontend running on example1.com
+  'https://krxzykrxzy.github.io/Image-Hoster',    // Frontend running on example2.com
+  'http://another-url.com'  // Another URL you want to allow
+];
+
+// Set up CORS middleware to allow specific origins
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);  // Allow the request if the origin is in the allowed list or if no origin is provided (for local requests)
+    } else {
+      callback(new Error('Not allowed by CORS'));  // Reject the request if the origin is not in the allowed list
+    }
+  },
+  methods: ['GET', 'POST'], // Allow specific HTTP methods (adjust as needed)
+};
+
+// Enable CORS with the options
+app.use(cors(corsOptions));
 
 // Ensure uploads folder exists
 const uploadsDir = 'uploads';
