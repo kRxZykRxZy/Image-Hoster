@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubbload and Play Video</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #videoContainer {
+            margin-top: 30px;
+        }
+
+        #videoPlayer {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+<center>    <div class="container">
+        <h1>Ubbload and Watch Video</h1>
+
+        <!-- Form to upload video -->
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="video" accept="video/*" required />
+            <button type="submit">Upload Video</button>
+        </form>
+
+        <!-- Video container -->
+        <div id="videoContainer" style="display: none;">
+            <h2>Video Playback:</h2>
+            <video id="videoPlayer" controls>
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <p id="message"></p>
+    </div>
+</center>
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function (e) {
+            e.preventDefault();  // Prevent form submission
+
+            const formData = new FormData();
+            const videoFile = document.querySelector('input[type="file"]').files[0];
+            formData.append('video', videoFile);
+
+            // Send the video file to the backend
+            fetch('http://localhost:3000/upload', {  // Use the correct backend URL
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.filePath) {
+                    document.getElementById('message').textContent = 'Video uploaded successfully!';
+                    document.getElementById('videoContainer').style.display = 'block';
+                    document.getElementById('videoPlayer').src = data.filePath;  // Show uploaded video
+                }
+            })
+            .catch(error => {
+                document.getElementById('message').textContent = 'Error uploading video.';
+                console.error('Error uploading video:', error);
+            });
+        });
+    </script>
+</body>
+</html>
