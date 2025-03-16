@@ -55,6 +55,24 @@
     .btn:active {
       background-color: #004085;
     }
+
+        .btn2 {
+      padding: 15px 30px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      text-decoration: none;
+    }
+    .btn2:hover {
+      background-color: #0056b3;
+    }
+    .btn2:active {
+      background-color: #004085;
+    }
   </style>
 </head>
 <body>
@@ -64,11 +82,15 @@
     <p>Upload and share anything with out platform!</p>
     
     <div class="button-container">
-      <a href="login" class="btn">Login</a>
+      <a href="login" class="btn2">Login</a>
       <a href="upload" class="btn">Go to Upload</a>
       <a href="Web" class="btn">Web Hosting</a>
     </div>
   </div>
  </center>
+  <script>const loggedIn = localStorage.getItem('verifiedUser')
+  if (loggedIn) {
+    document.getElementById("bt2").style.display="none"
+  }</script>
 </body>
 </html>
