@@ -23,13 +23,12 @@
   <script>
     const serverUrl = 'https://image-hoster.onrender.com';
 
-    // Redirect to upload page if user is already verified
     if (localStorage.getItem('verifiedUser')) {
       window.location.href = 'upload.html';
     }
 
     async function login() {
-      const username = document.getElementById('username').value;
+      let username = document.getElementById('username').value.trim().toLowerCase();
       if (!username) return alert('Enter your Scratch username.');
 
       const response = await fetch(`${serverUrl}/login`, {
@@ -41,14 +40,14 @@
       const result = await response.json();
       if (result.verified) {
         localStorage.setItem('verifiedUser', username);
-        window.location.href = 'index.html';
+        window.location.href = 'upload.html';
       } else {
         document.getElementById('codeMessage').textContent = result.message;
       }
     }
 
     async function verifyCode() {
-      const username = document.getElementById('username').value;
+      let username = document.getElementById('username').value.trim().toLowerCase();
       if (!username) return alert('Enter your username first.');
 
       const response = await fetch(`${serverUrl}/verify`, {
