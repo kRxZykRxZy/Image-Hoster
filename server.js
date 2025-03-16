@@ -8,10 +8,10 @@ const port = 3000;
 
 // Define allowed front-end URLs (you can modify these)
 const allowedOrigins = [
-  'https://scratch-image-hoster.netlify.app',  // Frontend running on localhost port 3001
-  'https://ubbload.netlify.app',    // Frontend running on example1.com
-  'https://krxzykrxzy.github.io/Image-Hoster',    // Frontend running on example2.com
-  'http://another-url.com'  // Another URL you want to allow
+  'https://scratch-image-hoster.netlify.app', 
+  'https://ubbload.netlify.app',    
+  'https://krxzykrxzy.github.io/Image-Hoster',    
+  'https://another-url.com' 
 ];
 
 // Set up CORS middleware to allow specific origins
@@ -23,7 +23,7 @@ const corsOptions = {
       callback(new Error('Not allowed by CORS'));  // Reject the request if the origin is not in the allowed list
     }
   },
-  methods: ['GET', 'POST'], // Allow specific HTTP methods (adjust as needed)
+  methods: ['GET', 'POST'], // Allow specific HTTP methods 
 };
 
 // Enable CORS with the options
