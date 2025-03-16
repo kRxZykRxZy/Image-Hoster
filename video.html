@@ -85,7 +85,7 @@
             formData.append('video', videoFile);
 
             // Send the video file to the backend
-            fetch('http://localhost:3000/upload', {  // Use the correct backend URL
+            fetch('https://video-hoster.onrender.com/upload', {  // Use the correct backend URL
                 method: 'POST',
                 body: formData
             })
