@@ -43,7 +43,7 @@
         const gitlabClientId = '8c5a3a0a0223b89e9b53b88701120c33823e5a34f6f7e1be8932a4beed9b6195';
         const netlifyAccessToken = 'nfp_dxpV2Vqetkh2HKjJi4q875tiEmQB7W4v7d90';
         const netlifyDeployUrl = 'https://api.netlify.com/api/v1/sites';
-        
+
         document.getElementById('github-login').addEventListener('click', () => {
             window.location.href = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&scope=repo`;
         });
@@ -51,6 +51,16 @@
         document.getElementById('gitlab-login').addEventListener('click', () => {
             window.location.href = `https://gitlab.com/oauth/authorize?client_id=${gitlabClientId}&response_type=token&scope=api`;
         });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('code')) {
+            const oauthCode = urlParams.get('code');
+            fetch(`/getAccessToken?code=${oauthCode}`)
+                .then(res => res.json())
+                .then(data => {
+                    fetchRepos('github', data.access_token);
+                });
+        }
 
         function fetchRepos(service, token) {
             let url = service === 'github' ? 'https://api.github.com/user/repos' : 'https://gitlab.com/api/v4/projects';
@@ -66,6 +76,7 @@
                     repoList.appendChild(option);
                 });
                 document.getElementById('repo-selector').style.display = 'block';
+                document.querySelector('.deploy-options').style.display = 'block';
             });
         }
 
